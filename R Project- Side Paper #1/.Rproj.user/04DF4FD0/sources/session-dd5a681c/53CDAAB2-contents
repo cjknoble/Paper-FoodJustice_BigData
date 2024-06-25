@@ -137,7 +137,7 @@ for (i in 1:nrow(kwlist)){
     trendsbytime <- trendsbytime %>% dplyr::select(-keyword, -hits)
     
     # Clean
-    trendsbyDMA <- data.frame(trends$interest_by_DMA)
+    trendsbyDMA <- data.frame(trends$interest_by_dma)
     trendsbyDMA <- trendsbyDMA %>% dplyr::select(-geo, -gprop)
     
     # DMA: Split query of interest and standardizing query into different columns
@@ -151,8 +151,8 @@ for (i in 1:nrow(kwlist)){
     trendsbyDMA <- trendsbyDMA %>% dplyr::select(-keyword.x, -keyword.y, -hits.y, -hits.x)
     
 
-    results.time.final <- cbind(results.time, trendsbytime)
-    results.DMA.final <- full_join(results.DMA, trendsbyDMA, by = "location")
+    results.time <- cbind(results.time, trendsbytime)
+    results.DMA <- full_join(results.DMA, trendsbyDMA, by = "location")
     
 
 }
@@ -190,8 +190,8 @@ for (i in 1:nrow(kwlist)){
 # }
 
 
-write.csv(results.time.final, file = "GTrends Mined Data - Time.csv", row.names = T)
-write.csv(results.DMA.final, file = "GTrends Mined Data - DMA.csv", row.names = T)
+write.csv(results.time, file = "GTrends Mined Data - Time.csv", row.names = T)
+write.csv(results.DMA, file = "GTrends Mined Data - DMA.csv", row.names = T)
 
 
 
