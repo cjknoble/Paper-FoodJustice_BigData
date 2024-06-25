@@ -3,7 +3,7 @@
     "path": "~/My Documents/Classes - '23 Spring/Research/Paper (Side) #1/R Project- Side Paper #1/R - Google Trends - Fast Food.R",
     "project_path": "R - Google Trends - Fast Food.R",
     "type": "r_source",
-    "hash": "0",
+    "hash": "1621772017",
     "contents": "",
     "dirty": false,
     "created": 1718734705449.0,
@@ -12,15 +12,15 @@
     "properties": {
         "source_window_id": "",
         "Source": "Source",
-        "cursorPosition": "162,34",
-        "scrollLine": "159"
+        "cursorPosition": "183,0",
+        "scrollLine": "147"
     },
     "folds": "14|47|39|0|\n40|52|63|0|\n",
-    "lastKnownWriteTime": 1719341505,
+    "lastKnownWriteTime": 1719345795,
     "encoding": "UTF-8",
     "collab_server": "",
     "source_window": "",
-    "last_content_update": 1719341505642,
+    "last_content_update": 1719345795821,
     "read_only": false,
     "read_only_alternatives": []
 }

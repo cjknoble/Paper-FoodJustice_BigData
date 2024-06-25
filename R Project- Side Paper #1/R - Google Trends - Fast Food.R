@@ -106,7 +106,9 @@ results.DMA$KeywordStandardized <- results.DMA[,2]/results.DMA[,4]
 colnames(results.DMA)[6] <-paste0(results.DMA[1, 3])
 results.DMA <- results.DMA %>% dplyr::select(-keyword.x, -keyword.y, -hits.y, -hits.x)
 
-### For Loop 
+
+
+### TIME: For Loop 
 
 # Import keywords list 
 kwlist <- read.csv("Fast Food Keywords.csv")
@@ -120,7 +122,7 @@ for (i in 1:nrow(kwlist)){
                       low_search_volume = TRUE,
                       cookie_url = "http://trends.google.com/Cookies/NID")
     
-    #Clean
+    # TIME: Clean
     trendsbytime <- data.frame(trends$interest_over_time)
     trendsbytime <- trendsbytime %>% dplyr::select(-geo, -time, -gprop, -category) 
     
@@ -131,12 +133,33 @@ for (i in 1:nrow(kwlist)){
     trendsbytime <- data.frame(trendsbytime, row.names = TRUE)
     trendsbytime <- cbind(trendsbytime, trendsbytime.IT)
     
-    # Divide query of interest by standardizing query 
+    # TIME: Divide query of interest by standardizing query 
     trendsbytime$KeywordStandardized <- trendsbytime[,1]/trendsbytime[,3]
     colnames(trendsbytime)[5] <- paste0(kwlist[i, 1])
     trendsbytime <- trendsbytime %>% dplyr::select(-keyword, -hits)
     
-    # Clean
+    results.time <- cbind(results.time, trendsbytime)
+
+}
+
+### DMA: For Loop
+
+# Loop gtrends functions and save output to results data frame 
+
+years <- 2010:2022
+
+for (i in 1:nrow(kwlist)){
+  keyword <- kwlist[i, 1]
+  
+  for (year in years){ 
+    trends <- gtrends(keyword = c(keyword, "IT Job"), 
+                      geo = c('US-CA'), 
+                      time = paste0(year, "-01-01 ", year, "-12-31"),
+                      gprop = "web",
+                      low_search_volume = TRUE,
+                      cookie_url = "http://trends.google.com/Cookies/NID")
+    
+    # DMA: Clean
     trendsbyDMA <- data.frame(trends$interest_by_dma)
     trendsbyDMA <- trendsbyDMA %>% dplyr::select(-geo, -gprop)
     
@@ -145,17 +168,31 @@ for (i in 1:nrow(kwlist)){
     trendsbyDMA <- trendsbyDMA %>%  subset(keyword != "IT Job")
     trendsbyDMA <- full_join(trendsbyDMA, trendsbyDMA.IT, by = "location")
     
-    # Divide query of interest by standardizing query 
+    # DMA: Divide query of interest by standardizing query 
     trendsbyDMA$KeywordStandardized <- trendsbyDMA[,2]/trendsbyDMA[,4]
-    colnames(trendsbyDMA)[6] <- paste0(kwlist[i, 1])
+    colnames(trendsbyDMA)[6] <- paste0(keyword, ", ", year)
+    
+    # DMA: Drop extra columns 
     trendsbyDMA <- trendsbyDMA %>% dplyr::select(-keyword.x, -keyword.y, -hits.y, -hits.x)
     
-
-    results.time <- cbind(results.time, trendsbytime)
-    results.DMA <- full_join(results.DMA, trendsbyDMA, by = "location")
     
-
+    results.DMA <- full_join(results.DMA, trendsbyDMA, by = "location")
+  }
+  
 }
+  
+write.csv(results.time, file = "GTrends Mined Data - Time.csv", row.names = T)
+write.csv(results.DMA, file = "GTrends Mined Data - DMA.csv", row.names = T)
+
+
+
+
+
+
+
+
+
+
 
 # # Loop gtrends functions and save output to results data frame 
 # for (i in 1:nrow(kwlist)){
@@ -166,33 +203,42 @@ for (i in 1:nrow(kwlist)){
 #                     low_search_volume = TRUE,
 #                     cookie_url = "http://trends.google.com/Cookies/NID")
 #   
+#   # TIME: Clean
 #   trendsbytime <- data.frame(trends$interest_over_time)
-#   trendsbytime <- trendsbytime %>% dplyr::select(-geo, -time, -gprop, -category)
+#   trendsbytime <- trendsbytime %>% dplyr::select(-geo, -time, -gprop, -category) 
+#   
+#   # TIME: Split query of interest and standardizing query into different columns
+#   trendsbytime.IT <- trendsbytime %>%  subset(keyword == "IT Job")
+#   trendsbytime.IT <- data.frame(trendsbytime.IT, row.names = TRUE)
 #   trendsbytime <- trendsbytime %>%  subset(keyword != "IT Job")
-#   colnames(trendsbytime)[2] <- paste0(kwlist[i, 1])
 #   trendsbytime <- data.frame(trendsbytime, row.names = TRUE)
-#   trendsbytime <- trendsbytime %>% dplyr::select(-keyword)
+#   trendsbytime <- cbind(trendsbytime, trendsbytime.IT)
 #   
+#   # TIME: Divide query of interest by standardizing query 
+#   trendsbytime$KeywordStandardized <- trendsbytime[,1]/trendsbytime[,3]
+#   colnames(trendsbytime)[5] <- paste0(kwlist[i, 1])
+#   trendsbytime <- trendsbytime %>% dplyr::select(-keyword, -hits)
 #   
-#   trendsbyDMA <- data.frame(trends$interest_by_DMA)
+#   # DMA: Clean
+#   trendsbyDMA <- data.frame(trends$interest_by_dma)
 #   trendsbyDMA <- trendsbyDMA %>% dplyr::select(-geo, -gprop)
+#   
+#   # DMA: Split query of interest and standardizing query into different columns
+#   trendsbyDMA.IT <- trendsbyDMA %>%  subset(keyword == "IT Job")
 #   trendsbyDMA <- trendsbyDMA %>%  subset(keyword != "IT Job")
-#   colnames(trendsbyDMA)[2] <- paste0(kwlist[i, 1])
-#   trendsbyDMA <- trendsbyDMA %>% dplyr::select(-keyword)
+#   trendsbyDMA <- full_join(trendsbyDMA, trendsbyDMA.IT, by = "location")
+#   
+#   # Divide query of interest by standardizing query 
+#   trendsbyDMA$KeywordStandardized <- trendsbyDMA[,2]/trendsbyDMA[,4]
+#   colnames(trendsbyDMA)[6] <- paste0(kwlist[i, 1])
+#   trendsbyDMA <- trendsbyDMA %>% dplyr::select(-keyword.x, -keyword.y, -hits.y, -hits.x)
 #   
 #   
 #   results.time <- cbind(results.time, trendsbytime)
 #   results.DMA <- full_join(results.DMA, trendsbyDMA, by = "location")
 #   
-#   #results.DMA <- cbind(results.DMA, trendsbyDMA)
-#   
 #   
 # }
-
-
-write.csv(results.time, file = "GTrends Mined Data - Time.csv", row.names = T)
-write.csv(results.DMA, file = "GTrends Mined Data - DMA.csv", row.names = T)
-
 
 
 
