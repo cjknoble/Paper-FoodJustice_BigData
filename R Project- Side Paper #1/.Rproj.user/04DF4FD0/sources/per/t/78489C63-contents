@@ -1,0 +1,281 @@
+##################################################################################
+### RSELENIUM 
+
+### R SELENIUM LOOP
+# Install and load the RSelenium package
+library(RSelenium)
+library(stringr)
+
+final.dataframe.name <- "googles_results_CommentPaper"
+#final.dataframe.name <- "google_results"
+
+keywords_df <- read.csv("C:/Users/cjkno/Documents/My Documents/Classes - '23 Spring/Research/Paper #3_Systems Dynamics/Data Collected/Social Media/R Project - Google Data Collection/R Project - Google Data Collection/GoogleKeywords_CommentPaper.csv")
+#keywords_df <- read.csv("C:/Users/cjkno/Documents/My Documents/Classes - '23 Spring/Research/Paper #3_Systems Dynamics/Data Collected/Social Media/R Project - Google Data Collection/R Project - Google Data Collection/GoogleKeywordsforBot.csv")
+
+
+# Create an empty dataframe to store the results
+result_df <- data.frame(year = integer(0), keyword = character(0), total_results = numeric(0))
+
+# Define a list of keywords, sequence of years, and pattern for parsing result values from text
+#keywords <- c("lead poisoning Newark NJ", "lead paint Newark NJ", "lead contamination Newark NJ")
+years <- 2000:2022
+pattern <- "\\d{1,3}(,\\d{3})*"
+
+# Start a Selenium server and create a remote driver
+driver <- rsDriver(browser = "firefox",
+                   version = "latest",
+                   chromever = NULL,
+                   geckover = "latest",
+                   iedrver = NULL,
+                   phantomver = NULL,
+                   verbose = TRUE)
+
+remote_driver <- driver$client
+
+
+for (i in 1:nrow(keywords_df)){ 
+  keyword <- keywords_df$Keywords[i]
+  for (year in years){
+    
+    # Set webpage url
+    url <- paste0("https://www.google.com/search?q=", URLencode(keyword), "&sca_esv=570700320&source=lnt&tbs=cdr%3A1%2Ccd_min%3A1%2F1%2F", year, "%2Ccd_max%3A12%2F31%2F",year,"&tbm=")
+    
+    # Navigate to the webpage
+    remote_driver$navigate(url)
+    
+    Sys.sleep(4)
+    
+    # Find the button element by its CSS selector 
+    button <- remote_driver$findElement(using = "css selector", value = ".WjMmQ") #Alt option is  #hdtb-tls OR .WjMmQ
+    
+    # Click the button
+    button$clickElement()
+    
+    # Wait for a few seconds to ensure the page content loads after clicking the button
+    Sys.sleep(2)
+    
+    # Find the element with the #result-statistics CSS ID
+    result_stats <- remote_driver$findElement(using = "css", value = "#result-stats")
+    
+    # Extract the text content of the element
+    result_text <- result_stats$getElementText()
+    
+    # Extract the numeric part from the string
+    result_numeric_value <- as.numeric(gsub(",", "", str_extract(result_text[[1]][1], pattern)))
+    
+    # Add the results to the df
+    result_df <- rbind(result_df, data.frame(year = year, keyword = keyword, total_results = result_numeric_value))
+  }
+}
+
+# Close the remote driver and server when done
+remote_driver$close()
+driver$server$stop()
+
+# Print results 
+View(result_df)
+
+# Save to separate df 
+result_df <- rbind(paste0(final.dataframe.name), result_df)
+
+paste0(final.dataframe.name) <- result_df
+googles_results_CommentPaper <- result_df
+
+write.csv(google_results, file = paste0(final.dataframe.name, ".csv"))
+
+
+##############################################################
+
+#THIS WORKS BUT DOES NOT ALLOW FOR SEARCHING SPECIFIC YEARS 
+# # API Key AIzaSyCGWvFtv_6W2WQ0ur_ekRk_MVKJy7lqU50
+# <script async src="https://cse.google.com/cse.js?cx=67009a500271f4802">
+#   </script>
+#   <div class="gcse-search"></div>
+
+library(httr)
+library(jsonlite)
+
+# Define your API key and CSE ID
+api_key <- "AIzaSyCGWvFtv_6W2WQ0ur_ekRk_MVKJy7lqU50"
+cse_id <- "67009a500271f4802"
+
+# Define the search query
+query <- "lead Newark NJ"
+
+# Create the API request URL
+url <- sprintf("https://www.googleapis.com/customsearch/v1?q=%s&cx=%s&key=%s", 
+               URLencode(query), cse_id, api_key)
+
+# Make the API request
+response <- GET(url)
+
+# Check if the request was successful
+if (http_type(response) == "application/json") {
+  # Parse the JSON response
+  data <- fromJSON(content(response, "text"))
+  
+  # Extract the total number of results
+  total_results <- as.numeric(data$searchInformation$totalResults)
+  
+  cat("Total Results: ", total_results, "\n")
+} else {
+  cat("API request failed.\n")
+}
+
+  
+
+
+
+
+
+#####################
+
+
+# library(searchConsoleR)
+# scr_auth()
+# 
+# options("searchConsoleR.client_id" = "67009a500271f4802")
+# options("searchConsoleR.client_secret" = "AIzaSyCGWvFtv_6W2WQ0ur_ekRk_MVKJy7lqU50")
+# 
+# search_analytics("https://cse.google.com/cse?cx=67009a500271f4802", 
+#                  start = "2000-01-01", end = "2000-12-31",
+#                  searchType = )
+
+############################################################################
+### DOWNLOAD HTMLM 
+library(httr)
+
+# Function to search Google and download HTML
+search_and_download <- function(search_query, file_name) {
+  # Construct the Google search URL
+  search_url <- paste0("https://www.google.com/search?q=", URLencode(search_query), "&sca_esv=570700320&source=lnt&tbs=cdr%3A1%2Ccd_min%3A1%2F1%2F", 2000, "%2Ccd_max%3A12%2F31%2F",2000,"&tbm=")
+  
+  # Send an HTTP GET request to Google
+  response <- GET(search_url)
+  
+  # Check if the request was successful
+  if (http_type(response) == "text/html") {
+    # Save the HTML content to a file
+    writeLines(content(response, "text"), file_name)
+    cat("HTML file saved as", file_name, "\n")
+  } else {
+    cat("Error: Unable to retrieve search results.\n")
+  }
+}
+
+# Example usage: Search for "example query" and save the HTML to a file
+search_query <- "lead poisoning Newark NJ"
+file_name <- "google_search_results_lead_poisoning.mhtml"
+search_and_download(search_query, file_name)
+
+
+###################################################################################
+library(rvest)
+
+url <- paste0("https://www.google.com/search?q=lead+poisoning+newark+NJ&sca_esv=571003301&source=lnt&tbs=cdr%3A1%2Ccd_min%3A1%2F1%2F2000%2Ccd_max%3A12%2F31%2F2000&tbm=")
+url <- paste0("https://www.google.com/search?q=", URLencode("lead Newark NJ"), "&sca_esv=570700320&source=lnt&tbs=cdr%3A1%2Ccd_min%3A1%2F1%2F", 2000, "%2Ccd_max%3A12%2F31%2F",2000,"&tbm=")
+
+html <- minimal_html(url)
+
+response <- read_html(url)
+
+response %>% html_elements(xpath = "/html/body/div[6]/div/div[8]/div/div[1]/div/div/div/div") 
+response %>% html_elements(css = "#result-stats")
+
+
+
+
+
+
+
+
+
+getData <- function() {
+  
+  url <- paste0("https://www.google.com/search?q=", URLencode("lead Newark NJ"), "&sca_esv=570700320&source=lnt&tbs=cdr%3A1%2Ccd_min%3A1%2F1%2F", 2000, "%2Ccd_max%3A12%2F31%2F",2000,"&tbm=")
+  response <- read_html(url)
+  
+  results <- html_elements(response, "div.appbar") #LHJvCe
+  c <- 0
+  
+  for (result in results) {
+    description<- html_text(html_elements(results, ".WE0UJf"))
+    position <- c + 1
+    
+    cat("Description: ", description, "\n")
+    cat("Position: ", position, "\n\n")
+    
+    c <- c + 1
+  }
+}
+
+getData()
+
+getData <- function() {
+  url <- paste0("https://www.google.com/search?q=", URLencode("lead Newark NJ"), "&sca_esv=570700320&source=lnt&tbs=cdr%3A1%2Ccd_min%3A1%2F1%2F", 2000, "%2Ccd_max%3A12%2F31%2F", 2000, "&tbm=")
+  response <- read_html(url)
+  
+  # Extract and print total results if found
+  total_results <- html_text(html_elements(response, xpath = "d/html/body/div[6]/div/div[8]/div/div[1]/div/div/div/div"))
+  
+  # Clean up the extracted text to obtain the number only
+  total_results <- gsub("[^0-9,]+", "", total_results)
+  
+  cat("Total Results: ", total_results, "\n")
+}
+
+getData()
+
+
+
+###########################################################
+library(rvest)
+library(dplyr)
+
+# List of keywords to search
+keywords <- c("lead poisoning Newark NJ", "lead paint Newark NJ", "lead toys Newark NJ")
+
+# List of years to check
+years <- 2000:2022
+
+# Initialize an empty data frame to store results
+results_df <- data.frame(Year = integer(), Keyword = character(), TotalResults = character())
+
+
+url <- paste0("https://www.google.com/search?q=", URLencode("lead Newark NJ"), "&sca_esv=570700320&source=lnt&tbs=cdr%3A1%2Ccd_min%3A1%2F1%2F", 2000, "%2Ccd_max%3A12%2F31%2F",2000,"&tbm=")
+page <- read_html(url)
+html_text(html_elements(page, "div#results-stats"))
+          
+page %>% html_elements(xpath = '//*[(@id = "result-stats")]') %>% html_text()
+
+?html_element
+
+# Define a function to scrape Google search results
+scrape_google_results <- function(keyword, year) {
+  # Construct the Google search URL
+  url <- paste0("https://www.google.com/search?q=", URLencode(keyword), "&sca_esv=570700320&source=lnt&tbs=cdr%3A1%2Ccd_min%3A1%2F1%2F", year, "%2Ccd_max%3A12%2F31%2F", year, "&tbm=")
+    
+  # Send a GET request to the URL
+  page <- read_html(url)
+  
+  # Extract the total number of results
+  result_text <- html_text(html_nodes(page, "#result-stats"))  # CSS selector for result count
+  if (length(result_text) > 0) {
+    total_results <- as.character(gsub(",", "", result_text))
+  } else {
+    total_results <- NA
+  }
+  
+  return(total_results)
+}
+
+# Loop through keywords and years, scraping and storing the results
+for (keyword in keywords) {
+  for (year in years) {
+    total_results <- scrape_google_results(keyword, year)
+    results_df <- rbind(results_df, data.frame(Year = year, Keyword = keyword, TotalResults = total_results))
+  }
+}
+
+# Save results to a CSV file
+write.csv(results_df, "google_results.csv", row.names = FALSE)
