@@ -2,8 +2,9 @@
 library(dplyr)
 library(tidyr)
 
+### 2010-2012
 # Define the directory containing the Excel files
-folder_path <- "C:/Users/cjkno/Documents/My Documents/Classes - '23 Spring/Research/Paper (Side) #1/DATA/Census/Census Table DP05 2010-2022 (Tract)/New folder"
+folder_path <- "C:/Users/cjkno/Documents/My Documents/Classes - '23 Spring/Research/Paper (Side) #1/DATA/Census/Census Table DP05 2010-2022 (Tract)/New folder (2010-2012)"
 
 # Get a list of all Excel files in the directory
 csv_files <- list.files(path = folder_path, pattern = ".csv", full.names = TRUE)
@@ -21,24 +22,23 @@ for (file in csv_files) {
   data <- read.csv(file)
   
   # Select the required columns
-  data <- data %>% select(
+  data <- data %>% select( # consider grabbing all estimates to manually calculate percentages later 
     GEO_ID,
     NAME,
-    DP05_0001E,
-    DP05_0004E,
-    DP05_0005E,
-    DP05_0006E,
-    DP05_0007E,
-    DP05_0008E,
-    DP05_0009E,
-    DP05_0065E,
-    DP05_0072E,
-    DP05_0072PE
+    Estimate__SEX_AND_AGE__Total_population,
+    Estimate__SEX_AND_AGE__Under_5_years,
+    Estimate__SEX_AND_AGE__5_to_9_years,
+    Estimate__SEX_AND_AGE__10_to_14_years,
+    Estimate__SEX_AND_AGE__15_to_19_years,
+    Estimate__SEX_AND_AGE__20_to_24_years,
+    Estimate__SEX_AND_AGE__25_to_34_years,
+    Estimate__HISPANIC_OR_LATINO_AND_RACE__Total_population,
+    Estimate__HISPANIC_OR_LATINO_AND_RACE__Not_Hispanic_or_Latino__White_alone
   )
   
   # Convert the necessary columns to numeric
   data <- data %>%
-    mutate_at(vars(DP05_0001E:DP05_0072PE), as.numeric)
+    mutate_at(vars(Estimate__SEX_AND_AGE__Total_population:Estimate__HISPANIC_OR_LATINO_AND_RACE__Not_Hispanic_or_Latino__White_alone), as.numeric)
   
   # Rename the columns
   colnames(data) <- c(
@@ -52,8 +52,162 @@ for (file in csv_files) {
     "Est_SX_AGE_20_to_24_years",
     "Est_SX_AGE_25_to_34_years",
     "E_HSPNC_Total_population",
-    "E_NOTHSPNC_White_alone",
-    "P_NOTHSPNC_White_alone"
+    "E_NOTHSPNC_White_alone"
+  )
+  
+  # Create the new column Est_SX_AGE_Under35
+  data <- data %>%
+    mutate(E_Under35_SX_AGE = Est_SX_AGE_Under_5_years +
+             Est_SX_AGE_5_to_9_years +
+             Est_SX_AGE_10_to_14_years +
+             Est_SX_AGE_15_to_19_years +
+             Est_SX_AGE_20_to_24_years +
+             Est_SX_AGE_25_to_34_years)
+  
+  data <- data %>% select (
+    -NAME,
+    -Est_SX_AGE_Under_5_years,
+    -Est_SX_AGE_5_to_9_years,
+    -Est_SX_AGE_10_to_14_years,
+    -Est_SX_AGE_15_to_19_years,
+    -Est_SX_AGE_20_to_24_years,
+    -Est_SX_AGE_25_to_34_years,
+  )
+  
+  # Append the file name to each column name
+  file_name <- gsub(".csv", "", basename(file))
+  cols_to_rename <- 2:ncol(data)
+  colnames(data)[cols_to_rename] <- paste0(colnames(data)[cols_to_rename], "_", file_name)
+  
+  final_data <- full_join(final_data, data, by ="GEO_ID")
+}
+
+### 2013-2016
+
+# Define the directory containing the Excel files
+folder_path <- "C:/Users/cjkno/Documents/My Documents/Classes - '23 Spring/Research/Paper (Side) #1/DATA/Census/Census Table DP05 2010-2022 (Tract)/New folder (2013-2016)"
+
+# Get a list of all Excel files in the directory
+csv_files <- list.files(path = folder_path, pattern = ".csv", full.names = TRUE)
+
+# Initialize an empty list to store data frames
+data_list <- list()
+
+# Loop through each CSV file
+for (file in csv_files) {
+  
+  # Read the CSV file
+  data <- read.csv(file)
+  
+  # Select the required columns
+  data <- data %>% select( # consider grabbing all estimates to manually calculate percentages later 
+    GEO_ID,
+    NAME,
+    Estimate__SEX_AND_AGE__Total_population,
+    Estimate__SEX_AND_AGE__Under_5_years,
+    Estimate__SEX_AND_AGE__5_to_9_years,
+    Estimate__SEX_AND_AGE__10_to_14_years,
+    Estimate__SEX_AND_AGE__15_to_19_years,
+    Estimate__SEX_AND_AGE__20_to_24_years,
+    Estimate__SEX_AND_AGE__25_to_34_years,
+    Estimate__HISPANIC_OR_LATINO_AND_RACE__Total_population,
+    Estimate__HISPANIC_OR_LATINO_AND_RACE__Total_population__Not_Hispanic_or_Latino__White_alone
+  )
+  
+  # Convert the necessary columns to numeric
+  data <- data %>%
+    mutate_at(vars(Estimate__SEX_AND_AGE__Total_population:Estimate__HISPANIC_OR_LATINO_AND_RACE__Total_population__Not_Hispanic_or_Latino__White_alone), as.numeric)
+  
+  # Rename the columns
+  colnames(data) <- c(
+    "GEO_ID",
+    "NAME",
+    "E_Total_population_SX_AGE",
+    "Est_SX_AGE_Under_5_years",
+    "Est_SX_AGE_5_to_9_years",
+    "Est_SX_AGE_10_to_14_years",
+    "Est_SX_AGE_15_to_19_years",
+    "Est_SX_AGE_20_to_24_years",
+    "Est_SX_AGE_25_to_34_years",
+    "E_HSPNC_Total_population",
+    "E_NOTHSPNC_White_alone"
+  )
+  
+  # Create the new column Est_SX_AGE_Under35
+  data <- data %>%
+    mutate(E_Under35_SX_AGE = Est_SX_AGE_Under_5_years +
+             Est_SX_AGE_5_to_9_years +
+             Est_SX_AGE_10_to_14_years +
+             Est_SX_AGE_15_to_19_years +
+             Est_SX_AGE_20_to_24_years +
+             Est_SX_AGE_25_to_34_years)
+  
+  data <- data %>% select (
+    -NAME,
+    -Est_SX_AGE_Under_5_years,
+    -Est_SX_AGE_5_to_9_years,
+    -Est_SX_AGE_10_to_14_years,
+    -Est_SX_AGE_15_to_19_years,
+    -Est_SX_AGE_20_to_24_years,
+    -Est_SX_AGE_25_to_34_years,
+  )
+  
+  # Append the file name to each column name
+  file_name <- gsub(".csv", "", basename(file))
+  cols_to_rename <- 2:ncol(data)
+  colnames(data)[cols_to_rename] <- paste0(colnames(data)[cols_to_rename], "_", file_name)
+  
+  final_data <- full_join(final_data, data, by ="GEO_ID")
+}
+
+### 2017-2019
+# Define the directory containing the Excel files
+folder_path <- "C:/Users/cjkno/Documents/My Documents/Classes - '23 Spring/Research/Paper (Side) #1/DATA/Census/Census Table DP05 2010-2022 (Tract)/New folder (2017-2019)"
+
+# Get a list of all Excel files in the directory
+csv_files <- list.files(path = folder_path, pattern = ".csv", full.names = TRUE)
+
+# Initialize an empty list to store data frames
+data_list <- list()
+
+# Loop through each CSV file
+for (file in csv_files) {
+  
+  # Read the CSV file
+  data <- read.csv(file)
+  
+  # Select the required columns
+  data <- data %>% select( # consider grabbing all estimates to manually calculate percentages later 
+    GEO_ID,
+    NAME,
+    Estimate__SEX_AND_AGE__Total_population,
+    Estimate__SEX_AND_AGE__Total_population__Under_5_years,
+    Estimate__SEX_AND_AGE__Total_population__5_to_9_years,
+    Estimate__SEX_AND_AGE__Total_population__10_to_14_years,
+    Estimate__SEX_AND_AGE__Total_population__15_to_19_years,
+    Estimate__SEX_AND_AGE__Total_population__20_to_24_years,
+    Estimate__SEX_AND_AGE__Total_population__25_to_34_years,
+    Estimate__HISPANIC_OR_LATINO_AND_RACE__Total_population,
+    Estimate__HISPANIC_OR_LATINO_AND_RACE__Total_population__Not_Hispanic_or_Latino__White_alone
+  )
+  
+  # Convert the necessary columns to numeric
+  data <- data %>%
+    mutate_at(vars(Estimate__SEX_AND_AGE__Total_population:Estimate__HISPANIC_OR_LATINO_AND_RACE__Total_population__Not_Hispanic_or_Latino__White_alone), as.numeric)
+  
+  # Rename the columns
+  colnames(data) <- c(
+    "GEO_ID",
+    "NAME",
+    "E_Total_population_SX_AGE",
+    "Est_SX_AGE_Under_5_years",
+    "Est_SX_AGE_5_to_9_years",
+    "Est_SX_AGE_10_to_14_years",
+    "Est_SX_AGE_15_to_19_years",
+    "Est_SX_AGE_20_to_24_years",
+    "Est_SX_AGE_25_to_34_years",
+    "E_HSPNC_Total_population",
+    "E_NOTHSPNC_White_alone"
   )
   
   # Create the new column Est_SX_AGE_Under35
@@ -84,8 +238,108 @@ for (file in csv_files) {
 }
 
 # Save the final merged data frame to a CSV file
-write.csv(final_data, "C:/Users/cjkno/Documents/My Documents/Classes - '23 Spring/Research/Paper (Side) #1/DATA/Census/Census Data - Selected Joins.csv", row.names = TRUE)
+write.csv(final_data, "C:/Users/cjkno/Documents/My Documents/Classes - '23 Spring/Research/Paper (Side) #1/DATA/Census/Census Data - Selected Joins (2010-2019) V2.csv", row.names = TRUE)
 
 
 
+### 2020-2022
+
+# Initialize data frame of geoids to store results 
+final_data <- read.csv(csv_files[1]) %>% select("GEO_ID")
+
+# Define the directory containing the Excel files
+folder_path <- "C:/Users/cjkno/Documents/My Documents/Classes - '23 Spring/Research/Paper (Side) #1/DATA/Census/Census Table DP05 2010-2022 (Tract)/New folder (2020+)"
+
+# Get a list of all Excel files in the directory
+csv_files <- list.files(path = folder_path, pattern = ".csv", full.names = TRUE)
+
+# Initialize an empty list to store data frames
+data_list <- list()
+
+# Loop through each CSV file
+for (file in csv_files) {
+  
+  # Read the CSV file
+  data <- read.csv(file)
+  
+  # Select the required columns
+  data <- data %>% select( # consider grabbing all estimates to manually calculate percentages later 
+    GEO_ID,
+    NAME,
+    Estimate__SEX_AND_AGE__Total_population,
+    Estimate__SEX_AND_AGE__Total_population__Under_5_years,
+    Estimate__SEX_AND_AGE__Total_population__5_to_9_years,
+    Estimate__SEX_AND_AGE__Total_population__10_to_14_years,
+    Estimate__SEX_AND_AGE__Total_population__15_to_19_years,
+    Estimate__SEX_AND_AGE__Total_population__20_to_24_years,
+    Estimate__SEX_AND_AGE__Total_population__25_to_34_years,
+    Estimate__HISPANIC_OR_LATINO_AND_RACE__Total_population,
+    Estimate__HISPANIC_OR_LATINO_AND_RACE__Total_population__Not_Hispanic_or_Latino__White_alone
+  )
+  
+  # Convert the necessary columns to numeric
+  data <- data %>%
+    mutate_at(vars(Estimate__SEX_AND_AGE__Total_population:Estimate__HISPANIC_OR_LATINO_AND_RACE__Total_population__Not_Hispanic_or_Latino__White_alone), as.numeric)
+  
+  # Rename the columns
+  colnames(data) <- c(
+    "GEO_ID",
+    "NAME",
+    "E_Total_population_SX_AGE",
+    "Est_SX_AGE_Under_5_years",
+    "Est_SX_AGE_5_to_9_years",
+    "Est_SX_AGE_10_to_14_years",
+    "Est_SX_AGE_15_to_19_years",
+    "Est_SX_AGE_20_to_24_years",
+    "Est_SX_AGE_25_to_34_years",
+    "E_HSPNC_Total_population",
+    "E_NOTHSPNC_White_alone"
+  )
+  
+  # Create the new column Est_SX_AGE_Under35
+  data <- data %>%
+    mutate(E_Under35_SX_AGE = Est_SX_AGE_Under_5_years +
+             Est_SX_AGE_5_to_9_years +
+             Est_SX_AGE_10_to_14_years +
+             Est_SX_AGE_15_to_19_years +
+             Est_SX_AGE_20_to_24_years +
+             Est_SX_AGE_25_to_34_years)
+  
+  data <- data %>% select (
+    -NAME,
+    -Est_SX_AGE_Under_5_years,
+    -Est_SX_AGE_5_to_9_years,
+    -Est_SX_AGE_10_to_14_years,
+    -Est_SX_AGE_15_to_19_years,
+    -Est_SX_AGE_20_to_24_years,
+    -Est_SX_AGE_25_to_34_years,
+  )
+  
+  # Append the file name to each column name
+  file_name <- gsub(".csv", "", basename(file))
+  cols_to_rename <- 2:ncol(data)
+  colnames(data)[cols_to_rename] <- paste0(colnames(data)[cols_to_rename], "_", file_name)
+  
+  final_data <- full_join(final_data, data, by ="GEO_ID")
+}
+
+# Save the final merged data frame to a CSV file
+write.csv(final_data, "C:/Users/cjkno/Documents/My Documents/Classes - '23 Spring/Research/Paper (Side) #1/DATA/Census/Census Data - Selected Joins (2020-2022) V2.csv", row.names = TRUE)
+
+
+# # Select the required columns
+# data <- data %>% select( # consider grabbing all estimates to manually calculate percentages later 
+#   GEO_ID,
+#   NAME,
+#   DP05_0001E,
+#   DP05_0004E,
+#   DP05_0005E,
+#   DP05_0006E,
+#   DP05_0007E,
+#   DP05_0008E,
+#   DP05_0009E,
+#   DP05_0065E,
+#   DP05_0072E,
+#   DP05_0072PE
+# )
 
