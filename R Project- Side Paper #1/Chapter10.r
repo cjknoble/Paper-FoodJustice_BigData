@@ -129,6 +129,28 @@ gb.splm.individual.fixed <- spml (gb.fm.p, data = spatial_data_p, listw = gb.lis
 
 summary(gb.splm.individual.fixed)
 
+
+#debugging 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # 2. Spatial individual fixed effect model (error model):
 
 # Load the splm library if it is not yet loaded:

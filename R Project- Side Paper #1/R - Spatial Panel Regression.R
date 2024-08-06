@@ -12,61 +12,74 @@ library(reshape2)
 library(sf)
 library(tidyverse)
 
-spatial_data <- st_read("C:/Users/cjkno/Documents/My Documents/Classes - '23 Spring/Research/Paper (Side) #1/Shapefile with All Data 10July2024", "DMAs_CirculatoryER_CensusData_GTrends_Simp")
+spatial_data <- st_read("C:/Users/cjkno/Documents/My Documents/Classes - '23 Spring/Research/Paper (Side) #1/Shapefile with All Data 26July2024", "DMAs_CirculatoryER_CensusData_GTrends_V4_")
 
 # Sort Names Alphabetically 
 spatial_data <- spatial_data %>% arrange(NAME)
 
-# Select a model
+
+################################################################################
+### Select a model
 
 # Extract only the needed data for panel regression:
 
-#McD
-gb.fm.p <- CircWtd ~ BIPOC + Hsptls + McD # Individual, Time, ~pooled, Lag
+# #McD
+gb.fm.p <- HsW ~ BIPOC + AGE + McD #Fixed, time, lag
+
 spatial_data <- spatial_data[, c("NAME",
-                                     "Hsptls16",	"Hsptls17",	"Hsptls18",	"Hsptls19",	"Hsptls20",	"Hsptls21",	"Hsptls22",
-                                     "CircWtd16",	"CircWtd17",	"CircWtd18", "CircWtd19", "CircWtd20", "CircWtd21", "CircWtd22",
-                                     "P_BIPOC16",	"P_BIPOC17",	"P_BIPOC18",	"P_BIPOC19", "P_BIPOC20", "P_BIPOC21", "P_BIPOC22",
-                                     "McD16",	"McD17",	"McD18",	"McD19",	"McD20",	"McD21",	"McD22")]
+                                 "Circ_HsW16",	"Circ_HsW17",	"Circ_HsW18", "Circ_HsW19", "Circ_HsW20", "Circ_HsW21", "Circ_HsW22",
+                                 "P_AGE16",	"P_AGE17",	"P_AGE18",	"P_AGE19", "P_AGE20", "P_AGE21", "P_AGE22",
+                                 "P_BIPOC16",	"P_BIPOC17",	"P_BIPOC18",	"P_BIPOC19", "P_BIPOC20", "P_BIPOC21", "P_BIPOC22",
+                                 "McD16",	"McD17",	"McD18",	"McD19",	"McD20",	"McD21",	"McD22")]
 
-# # TB
-# gb.fm.p <- CircWtd ~ BIPOC + Hsptls + TB # Individual, Time, ~pooled
-# spatial_data <- spatial_data[, c("NAME",
-#                                      "Hsptls14",	"Hsptls16",	"Hsptls17",	"Hsptls18",	"Hsptls19",	"Hsptls20",	"Hsptls21",	"Hsptls22",
-#                                      "CircWtd14",	"CircWtd16",	"CircWtd17",	"CircWtd18", "CircWtd19", "CircWtd20", "CircWtd21", "CircWtd22",
-#                                      "P_BIPOC14",	"P_BIPOC16",	"P_BIPOC17",	"P_BIPOC18",	"P_BIPOC19", "P_BIPOC20", "P_BIPOC21", "P_BIPOC22",
-#                                      "TB14",	"TB16",	"TB17",	"TB18",	"TB19",	"TB20",	"TB21",	"TB22")]
-# 
-# # BK
-# gb.fm.p <- CircWtd ~ BIPOC + Hsptls + BK # Individual, Time, ~pooled
-# spatial_data <- spatial_data[, c("NAME",
-#                                      "Hsptls17",	"Hsptls18",	"Hsptls19",	"Hsptls20",	"Hsptls21",	"Hsptls22",
-#                                      "CircWtd17",	"CircWtd18", "CircWtd19", "CircWtd20", "CircWtd21", "CircWtd22",
-#                                      "P_BIPOC17",	"P_BIPOC18",	"P_BIPOC19", "P_BIPOC20", "P_BIPOC21", "P_BIPOC22",
-#                                      "BK17",	"BK18",	"BK19",	"BK20",	"BK21",	"BK22")]
-# 
-# # JITB
-# gb.fm.p <- CircWtd ~ BIPOC + Hsptls + JITB # Random, None
-# spatial_data <- spatial_data[, c("NAME",
-#                                      "Hsptls19",	"Hsptls20",	"Hsptls21",	"Hsptls22",
-#                                      "CircWtd19", "CircWtd20", "CircWtd21", "CircWtd22",
-#                                      "P_BIPOC19", "P_BIPOC20", "P_BIPOC21", "P_BIPOC22",
-#                                      "JITB19",	"JITB20",	"JITB21",	"JITB22")]
-# 
-# # KFC
-# gb.fm.p <- CircWtd ~ BIPOC + Hsptls + KFC # Individual, Time
-# spatial_data <- spatial_data[, c("NAME",
-#                                      "Hsptls18",	"Hsptls19",	"Hsptls20",	"Hsptls21",	"Hsptls22",
-#                                      "CircWtd18", "CircWtd19", "CircWtd20", "CircWtd21", "CircWtd22",
-#                                      "P_BIPOC18",	"P_BIPOC19", "P_BIPOC20", "P_BIPOC21", "P_BIPOC22",
-#                                      "KFC18",	"KFC19",	"KFC20",	"KFC21",	"KFC22")]
 
+spatial_data <- spatial_data %>% filter(NAME != "Eureka, CA"
+                                        & NAME != "Medford-Klamath Falls, OR"
+                                        & NAME!= "Chico-Redding, CA")
+
+# TB
+gb.fm.p <- HsW ~ BIPOC + AGE +  TB #Fixed, time, lag
+
+spatial_data <- spatial_data[, c("NAME",
+                                 "P_AGE14", "P_AGE16",	"P_AGE17",	"P_AGE18",	"P_AGE19", "P_AGE20", "P_AGE21", "P_AGE22",
+                                 "Circ_HsW14", "Circ_HsW16",	"Circ_HsW17",	"Circ_HsW18", "Circ_HsW19", "Circ_HsW20", "Circ_HsW21", "Circ_HsW22",
+                                 "P_BIPOC14",	"P_BIPOC16",	"P_BIPOC17",	"P_BIPOC18",	"P_BIPOC19", "P_BIPOC20", "P_BIPOC21", "P_BIPOC22",
+                                 "TB14",	"TB16",	"TB17",	"TB18",	"TB19",	"TB20",	"TB21",	"TB22")]
+
+spatial_data <- spatial_data %>% filter(NAME != "Eureka, CA" 
+                                        & NAME != "Yuma, AZ-El Centro, CA"
+                                        & NAME != "Monterey-Salinas, CA"
+                                        & NAME != "Palm Springs, CA"
+                                        & NAME != "Santa Barbara-Santa Maria-San Luis Obispo, CA"
+                                        & NAME != "Reno, NV"
+                                        & NAME != "Bakersfield, CA"
+                                        & NAME != "Chico-Redding, CA"
+                                        & NAME != "Medford-Klamath Falls, OR")
+
+
+# BK
+gb.fm.p <- HsW ~ BIPOC + AGE + BK # Fixed, time, lag
+
+spatial_data <- spatial_data[, c("NAME",
+                                 "Circ_HsW17",	"Circ_HsW18", "Circ_HsW19", "Circ_HsW20", "Circ_HsW21", "Circ_HsW22",
+                                 "P_AGE17",	"P_AGE18",	"P_AGE19", "P_AGE20", "P_AGE21", "P_AGE22",
+                                 "P_BIPOC17",	"P_BIPOC18",	"P_BIPOC19", "P_BIPOC20", "P_BIPOC21", "P_BIPOC22",
+                                 "BK17",	"BK18",	"BK19",	"BK20",	"BK21",	"BK22")]
+
+spatial_data <- spatial_data %>% filter(NAME == "Los Angeles, CA" |
+                                                    NAME == "Fresno-Visalia, CA" |
+                                                    NAME == "Sacramento-Stockton-Modesto, CA" | 
+                                                    NAME == "San Diego, CA" |
+                                                    NAME == "San Francisco-Oakland-San Jose, CA")
+
+
+################################################################################
+### Conversions 
 
 # Convert sf object to data.frame
 spatial_coord <- st_coordinates(st_centroid(spatial_data))
 
 spatial_data_df <- as.data.frame(spatial_data)
-
 
 # Reshape the data to long format
 spatial_data_long <- spatial_data_df %>%
@@ -75,17 +88,53 @@ spatial_data_long <- spatial_data_df %>%
                names_pattern = "([A-Za-z]+)([0-9]+)",
                values_drop_na = TRUE)
 
-
 # Correct the year values
 spatial_data_long$Year <- paste0("20", spatial_data_long$Year)
 
-# Drop year with no data for circulatory   
-# spatial_data_long <- subset(spatial_data_long, Year != 2015)
+# Log Transform Indep Variables
+spatial_data_long$BIPOC <- log(spatial_data_long$BIPOC)
+
+# Standardize dep variable
+spatial_data_long <- spatial_data_long %>% mutate(HsW = as.numeric(scale(HsW)))
 
 # Creating a pdata.frame
 spatial_data_p <- pdata.frame(spatial_data_long, index = c("NAME", "Year"))
 
-# Set the formula
+
+################################################################################
+### Check plots 
+
+# Check dep variable
+plot(density(spatial_data_p$HsW)) # Log
+
+# Plotting
+scatter.smooth(spatial_data_p$HsW, spatial_data_p$BIPOC) # Log
+scatter.smooth(spatial_data_p$HsW, spatial_data_p$AGE) # Log maybe but none
+scatter.smooth(spatial_data_p$HsW, spatial_data_p$McD) # None # Drop Eureka? 
+scatter.smooth(spatial_data_p$HsW, spatial_data_p$TB) # Log? # Drop Eurerka,Yuma?
+scatter.smooth(spatial_data_p$HsW, spatial_data_p$BK) # None? # Drop everything except ;  Bakersfield, Chico, Eureka, Monterey, Palm Springs, Reno, Santa Barbara
+
+library(ggplot2)
+
+# Make NAME a factor
+spatial_data_long$NAME <- as.factor(spatial_data_long$NAME)
+
+y <- spatial_data_long$BIPOC
+y <- spatial_data_long$AGE
+y <- spatial_data_long$McD
+y <- spatial_data_long$TB
+
+# Create the scatter plot with smoothed lines using ggplot2
+ggplot(spatial_data_long, aes(x = HsW, y = y, color = NAME)) +
+  geom_point() +  # Add scatter points
+  geom_smooth(method = "loess", se = FALSE) +  # Add smoothed lines
+  labs(title = "Scatter Plot Colored and Smoothed by NAME",
+       x = "HsW") +
+  theme_minimal()  # Use a minimal theme
+
+
+################################################################################
+### Checking the model types
 
 # Fit Fixed Effects, Random Effects, and Two-Ways Models
 fe_model <- plm(gb.fm.p, data = spatial_data_p, model = "within") # fe_model
@@ -119,10 +168,11 @@ plmtest(pool.mod, effect = "time") # time_effects_test
 plmtest(pool.mod, effect = "twoways") # twoways_effects_test
 
 
-
 ### Testing spatial models 
 
 # LM test for spatial lag or spatial error models:
+
+gb.listw <- nb2listw(poly2nb(spatial_data), style = "W")
 
 # Fixed effect models:
 slmtest (gb.fm.p, data = spatial_data_p, listw = gb.listw, model = "within", test = "lml") # Lag Fixed
@@ -155,6 +205,34 @@ summary(gb.splm.individual.fixed)
 
 #Results_McD <- gb.splm.individual.fixed
 
+# 1.5. Spatial time fixed effect model (lag model):
+# The lag switch must be TRUE and spatial.error must be set to be "none" so the spml() will return a spatial lag panel model.
+# Otherwise it will return a spatial autocorrelation panel model.
+
+gb.splm.time.fixed <- spml(formula = gb.fm.p, 
+                                 data = spatial_data_p, 
+                                 listw = gb.listw, 
+                                 model = "within", 
+                                 effect = "time", 
+                                 lag = TRUE, 
+                                 spatial.error = "none")
+
+summary(gb.splm.time.fixed)
+
+# 1.7. Spatial individual fixed effect model (lag model):
+# The lag switch must be TRUE and spatial.error must be set to be "none" so the spml() will return a spatial lag panel model.
+# Otherwise it will return a spatial autocorrelation panel model.
+
+gb.splm.time.random <- spml(formula = gb.fm.p, 
+                           data = spatial_data_p, 
+                           listw = gb.listw, 
+                           model = "random", 
+                           effect = "time", 
+                           lag = TRUE, 
+                           spatial.error = "none")
+
+summary(gb.splm.time.random)
+
 
 # 2. Spatial individual fixed effect model (error model):
 # The lag switch must be TRUE and spatial.error must be set to be "none" so the spml() will return a spatial lag panel model.
@@ -164,6 +242,20 @@ gb.spem.individual.fixed <- spml (gb.fm.p, data = spatial_data_p,
                                   listw = gb.listw, 
                                   model = "within", 
                                   effect = "individual", 
+                                  lag = FALSE, 
+                                  spatial.error = "kkp")
+
+summary(gb.spem.individual.fixed)
+
+# 2.5 Spatial time fixed effect model (error model):
+# The lag switch must be TRUE and spatial.error must be set to be "none" so the spml() will return a spatial lag panel model.
+# Otherwise it will return a spatial autocorrelation panel model.
+
+#KFC? KFC wants to be random but my theoretical understanding would say fixed...
+gb.spem.individual.fixed <- spml (gb.fm.p, data = spatial_data_p, 
+                                  listw = gb.listw, 
+                                  model = "within", 
+                                  effect = "time", 
                                   lag = FALSE, 
                                   spatial.error = "kkp")
 
@@ -204,16 +296,33 @@ summary(gb.sapm.individual.fixed)
 # 
 # Extract only the needed data for panel regression:
 # spatial_data_df <- spatial_data_df[, c("NAME",
-#                                        "Hsptls10",	"Hsptls11",	"Hsptls12",	"Hsptls13",	"Hsptls14",	"Hsptls16",	"Hsptls17",	"Hsptls18",	"Hsptls19",	"Hsptls20",	"Hsptls21",	"Hsptls22",
-#                                        "CircWtd10",	"CircWtd11",	"CircWtd12",	"CircWtd13",	"CircWtd14",	"CircWtd16",	"CircWtd17",	"CircWtd18", "CircWtd19", "CircWtd20", "CircWtd21", "CircWtd22",
-#                                        "P_BIPOC10",	"P_BIPOC11",	"P_BIPOC12",	"P_BIPOC13",	"P_BIPOC14",	"P_BIPOC16",	"P_BIPOC17",	"P_BIPOC18",	"P_BIPOC19", "P_BIPOC20", "P_BIPOC21", "P_BIPOC22",
-#                                        "McD16",	"McD17",	"McD18",	"McD19",	"McD20",	"McD21",	"McD22",	
-#                                        "TB14",	"TB16",	"TB17",	"TB18",	"TB19",	"TB20",	"TB21",	"TB22",	
-#                                        "BK17",	"BK18",	"BK19",	"BK20",	"BK21",	"BK22",	
-#                                        "JITB19",	"JITB20",	"JITB21",	"JITB22",	
+#                                        #"Hsptls10",	"Hsptls11",	"Hsptls12",	"Hsptls13",	"Hsptls14",	"Hsptls16",	"Hsptls17",	"Hsptls18",	"Hsptls19",	"Hsptls20",	"Hsptls21",	"Hsptls22",
+#                                        #"CircWtd10",	"CircWtd11",	"CircWtd12",	"CircWtd13",	"CircWtd14",	"CircWtd16",	"CircWtd17",	"CircWtd18", "CircWtd19", "CircWtd20", "CircWtd21", "CircWtd22",
+#                                        #"P_BIPOC10",	"P_BIPOC11",	"P_BIPOC12",	"P_BIPOC13",	"P_BIPOC14",	"P_BIPOC16",	"P_BIPOC17",	"P_BIPOC18",	"P_BIPOC19", "P_BIPOC20", "P_BIPOC21", "P_BIPOC22",
+#                                        "McD16",	"McD17",	"McD18",	"McD19",	"McD20",	"McD21",	"McD22",
+#                                        "TB14",	"TB16",	"TB17",	"TB18",	"TB19",	"TB20",	"TB21",	"TB22",
+#                                        "BK17",	"BK18",	"BK19",	"BK20",	"BK21",	"BK22",
+#                                        "JITB19",	"JITB20",	"JITB21",	"JITB22",
 #                                        "KFC18",	"KFC19",	"KFC20",	"KFC21",	"KFC22")]
 
+# # JITB
+# gb.fm.p <- CircWtd ~ BIPOC + Hsptls + JITB # Random, None but almost time, lag - droppping for low amount of data
+# gb.fm.p <- CircWtd ~ BIPOC + JITB
+# spatial_data <- spatial_data[, c("NAME",
+#                                      "Hsptls19",	"Hsptls20",	"Hsptls21",	"Hsptls22",
+#                                      "CircWtd19", "CircWtd20", "CircWtd21", "CircWtd22",
+#                                      "P_BIPOC19", "P_BIPOC20", "P_BIPOC21", "P_BIPOC22",
+#                                      "JITB19",	"JITB20",	"JITB21",	"JITB22")]
 
+
+# spatial_data <- spatial_data[, c("NAME",
+#                                  "Hsptls16",	"Hsptls17",	"Hsptls18",	"Hsptls19",	"Hsptls20",	"Hsptls21",	"Hsptls22",
+#                                  "CircWtd16",	"CircWtd17",	"CircWtd18", "CircWtd19", "CircWtd20", "CircWtd21", "CircWtd22",
+#                                  #"Circ16",	"Circ17",	"Circ18",	"Circ19",	"Circ20",	"Circ21",	"Circ22",
+#                                  #"P_AGE_2016",	"P_AGE_2017",	"P_AGE_2018",	"P_AGE_2019", "P_AGE_2020", "P_AGE_2021", "P_AGE_2022",
+#                                  "P_BIPOC16",	"P_BIPOC17",	"P_BIPOC18",	"P_BIPOC19", "P_BIPOC20", "P_BIPOC21", "P_BIPOC22",
+#                                  "McD16",	"McD17",	"McD18",	"McD19",	"McD20",	"McD21",	"McD22")]
+# 
 
 # # Convert to numeric fields 
 # spatial_data_df$P_BIPOC18 <- as.numeric(spatial_data_df$P_BIPOC18)
